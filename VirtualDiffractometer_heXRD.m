@@ -5,6 +5,9 @@
 % Note: Does not consider intensity parameters (e.g., structure factor)
 % Note: heXRD output files (grains.out and accepted_orientations.dat) must 
 % be in the same directory
+%
+% The 'Output' variable is [x y omega], where x,y are in pixels and omega
+% is in degrees. Each cell corresponds to a different grain.
 
 clear; clc
 
@@ -20,11 +23,12 @@ DETECTOR_PROPS.distance      = 1012.36;                                    % Det
 DETECTOR_PROPS.beamEnergy    = 55.618;                                     % (keV)
 %
 DIRECTORIES                  = struct();                                   % FILE DIRECTORIES (define below)
-DIRECTORIES.heXRD = '/Users/abucsek/Documents/CHESSDec15/Analysis/50NiTiSC_0D_1/fitgrains/HEXRD';             % heXRD output files (accepted_orientations and grains) directory
+DIRECTORIES.heXRD = '/Users/abucsek/Documents/CHESSDec15/Analysis/50NiTiSC_0D_1/fitgrains/HEXRD/CM';             % heXRD output files (accepted_orientations and grains) directory
 DIRECTORIES.maxPattern_path = '/Users/abucsek/Documents/CHESSDec15/Analysis/50NiTiSC_0D_1/fitgrains/HEXRD';   % Raw data max-over-all ge2 file path
 DIRECTORIES.maxPattern_name = 'HexrdTesting_CM-max_img.ge2';               % Raw data max-over-all ge2 file
 %
 RING_HKLS                   = [1 0 0; 1 1 0; 1 1 1; 0 2 0; 1 2 0];         % HKLS FOR RINGS (if desired)
+
 
 %% Set up
 % Distance from sample to detector (m)
@@ -95,8 +99,7 @@ fprintf('\n \n')
 parLights = cell(size(Orientations,1),1);
 for grainNum = 1 : size(Orientations,1)
     
-    Orientation = [-1 0 0; 0 1 0; 0 0 -1] * quat2rot(Orientations(grainNum, :)) * [-1 0 0; 0 1 0; 0 0 -1]';
-    Orientation = quat2rot(Orientations(grainNum, :))
+    Orientation = quat2rot(Orientations(grainNum, :));
     
     tVec_C = tVec_Cs(grainNum,:) * 1e-3;
     
@@ -124,7 +127,11 @@ for ii = 1 : size(Orientations,1)
     zeta_x = Lights(:,3);
     zeta_y = Lights(:,4);
     omega = Lights(:,1);
-    OutputTemp = [zeta_x/200e-6+1024  zeta_y/200e-6+1024  omega*180/pi];
+    OutputTemp = [zeta_x  zeta_y  omega*180/pi];
+    ix = find(zeta_x <= 0.2048 & zeta_x >= -0.2048);
+    OutputTemp = OutputTemp(ix,:);
+    iy = find(OutputTemp(:,2) <= 0.2048 & OutputTemp(:,2) >= -0.2048);
+    OutputTemp = OutputTemp(iy,:);
     for pp = 1 : length(OutputTemp)
         if OutputTemp(pp,3) < 0
             OutputTemp(pp,3) = OutputTemp(pp,3) + 360;
@@ -134,6 +141,7 @@ for ii = 1 : size(Orientations,1)
     end
     [temp,ind] = sort(OutputTemp(:,3));
     OutputTemp = OutputTemp(ind,:);
+    OutputTemp(:,1:2) = OutputTemp(:,1:2) / 200e-6 + 1024;
     Output{ii,1} = OutputTemp;
 end
 

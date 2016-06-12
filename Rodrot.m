@@ -1,3 +1,7 @@
+% Created by Ashley Bucsek, Colorado School of Mines, 2014
+% Returns the Rodrigues rotation matrix for a rotation of ang_in about
+% vec_in
+
 function mat_out=Rodrot(ang_in,vec_in)
 % Rodrigues rotation matrix formula
 

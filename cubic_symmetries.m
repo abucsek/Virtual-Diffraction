@@ -1,3 +1,6 @@
+% Created by Ashley Bucsek, Colorado School of Mines, 2014
+% Returns all the hkls in a family of hkls, assuming cubic symmetry
+
 function [vecout,L]=cubic_symmetries(vecin)
 
 e1=[1;0;0]; e2=[0;1;0]; e3=[0;0;1];
